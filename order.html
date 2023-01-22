@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/normal.css">
+    <title>Issaknot</title>
+  </head>
+  <body>
+    <div id="navbar">
+      <a href="home.html">Home</a>
+      <a href="order.html">Order</a>
+      <a href="in_stock.html">In Stock</a>
+      <a href="gallery.html">Gallery</a>
+    </div>
+    <h1>Wähle deine Form</h1>
+    <div>
+      <img src="/pics/forms/Dreieck.PNG" onclick="selectForm(this)"/>
+      <img src="/pics/forms/Kreis.PNG" onclick="selectForm(this)"/>
+      <img src="/pics/forms/Quadrat.PNG" onclick="selectForm(this)"/>
+    </div>
+    <h1>Wähle deine Farbe</h1>
+    <div>
+      <img src="/pics/colors/rot.PNG" onclick="selectColor(this)"/>
+      <img src="/pics/colors/Lila.PNG" onclick="selectColor(this)"/>
+      <img src="/pics/colors/Salmon.PNG" onclick="selectColor(this)"/>
+    </div>
+    <h1>Bestellen</h1>
+    <div>
+      <button onclick="submitOrder()">Bestellen</button>
+    </div>
+    <script>
+      var selectedForm = null;
+      var selectedColor = null;
+
+      function selectForm(image) {
+        if(selectedForm!=null){ 
+          selectedForm.classList.remove("selected");
+        }
+        selectedForm = image;
+        selectedForm.classList.add("selected");
+      }
+
+      function selectColor(image) {
+        if(selectedColor!=null){ 
+          selectedColor.classList.remove("selected");
+        }
+        selectedColor = image;
+        selectedColor.classList.add("selected");
+      }
+
+      function submitOrder() {
+        // code to handle order submission goes here
+      }
+    </script>
+  </body>
+</html>
