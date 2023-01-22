@@ -1,11 +1,35 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
   <head>
-    <title>Mein erstes HTML-Dokument</title>
-    <meta charset="utf-8" />
+    <title>Issaknot</title>
   </head>
-
   <body>
-    <p>Hallo Welt!</p>
+    <h1>Wähle deine Form</h1>
+    <div>
+      <img src="image1.jpg" onclick="selectForm(this)"/>
+      <img src="image2.jpg" onclick="selectForm(this)"/>
+      <img src="image3.jpg" onclick="selectForm(this)"/>
+    </div>
+    <h1>Wähle deine Farbe</h1>
+    <div>
+      <img src="color1.jpg" onclick="selectColor(this)"/>
+      <img src="color2.jpg" onclick="selectColor(this)"/>
+      <img src="color3.jpg" onclick="selectColor(this)"/>
+    </div>
+    <h1>Bestellen</h1>
+    <div>
+      <button onclick="submitOrder()">Bestellen</button>
+    </div>
+    <script>
+      function selectForm(image) {
+        // code to handle form selection goes here
+      }
+      function selectColor(image) {
+        // code to handle color selection goes here
+      }
+      function submitOrder() {
+        // code to handle order submission goes here
+      }
+    </script>
   </body>
 </html>
