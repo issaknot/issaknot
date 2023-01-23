@@ -12,13 +12,13 @@
       <a href="gallery.html">Gallery</a>
     </div>
     <h1>Wähle deine Form</h1>
-    <div>
+    <div id="available_forms">
       <img src="images/forms/Dreieck.PNG" onclick="selectForm(this)"/> 
       <img src="images/forms/Kreis.PNG" onclick="selectForm(this)"/>
       <img src="images/forms/Quadrat.PNG" onclick="selectForm(this)"/>
     </div>
     <h1>Wähle deine Farbe</h1>
-    <div>
+    <div id="available_colors">
       <img src="images/colors/Lila.PNG" onclick="selectColor(this)"/>
       <img src="images/colors/Rot.PNG" onclick="selectColor(this)"/>
       <img src="images/colors/Salmon.PNG" onclick="selectColor(this)"/>
@@ -26,29 +26,6 @@
     <div>
       <button onclick="submitOrder()">Bestellen</button>
     </div>
-    <script>
-      var selectedForm = null;
-      var selectedColor = null;
-
-      function selectForm(image) {
-        if(selectedForm!=null){ 
-          selectedForm.classList.remove("selected");
-        }
-        selectedForm = image;
-        selectedForm.classList.add("selected");
-      }
-
-      function selectColor(image) {
-        if(selectedColor!=null){ 
-          selectedColor.classList.remove("selected");
-        }
-        selectedColor = image;
-        selectedColor.classList.add("selected");
-      }
-
-      function submitOrder() {
-        // code to handle order submission goes here
-      }
-    </script>
+    <script src="script/order.js"></script>
   </body>
 </html>
