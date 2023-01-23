@@ -23,14 +23,14 @@ function submitOrder() {
 
 async function load_available_colors() {
     // Use the fetch API to get a list of files in the "images/colors" folder
-    const response = await fetch('https://issaknot.github.io/shop/images/colors/');
+    const response = await fetch('https://api.github.com/repos/issaknot/shop/contents/images/colors');
     const data = await response.json();
     const imageList = data.filter(item => item.endsWith('.png'));
 
     // Iterate through the list of images and create <img> elements
     for (const image of imageList) {
       const imgElement = document.createElement('img');
-      imgElement.src = `https://issaknot.github.io/shop/images/colors/${image}`;
+      imgElement.src = image.donwload_url;
       imgElement.onclick = selectColor(image);
       document.getElementById('available_colors').appendChild(imgElement);
     }
