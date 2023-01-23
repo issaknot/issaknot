@@ -38,7 +38,18 @@ img {
     height: 200px;
 }
 
-.selected {
+.selected_color {
     border: 5px solid #5c5cff;
     border-radius: 10px;
   }
+
+.selected_form  {
+    border: 5px solid #5c5cff;
+    border-radius: 10px;
+  }
+
+.form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

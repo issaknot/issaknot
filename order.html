@@ -12,17 +12,18 @@
       <a href="gallery.html">Gallery</a>
     </div>
     <h1>Wähle deine Form</h1>
-    <div id="available_forms">
-      <img src="images/forms/Dreieck.PNG" onclick="selectForm(this)"/> 
-      <img src="images/forms/Kreis.PNG" onclick="selectForm(this)"/>
-      <img src="images/forms/Quadrat.PNG" onclick="selectForm(this)"/>
-    </div>
+    <div id="available_forms"></div>
     <h1>Wähle deine Farbe</h1>
-    <div id="available_colors">
-    </div>
-    <div>
-      <button onclick="submitOrder()">Bestellen</button>
+    <div id="available_colors"></div>
+    <p></p>
+    <div class="form-container">
+      <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
+        <label>Your email:</label>
+        <input type="email" name="email" required>
+        <input type="hidden" name="message" id="order_message">
+        <button type="submit">Send</button>
+      </form>
     </div>
     <script src="script/order.js"></script>
-  </body>
+    </body>
 </html>
