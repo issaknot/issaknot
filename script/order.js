@@ -17,28 +17,6 @@ function selectColor(image) {
   selectedColor.classList.add("selected_color");
 }
 
-async function load_available_forms() {
-    const response = await fetch('https://api.github.com/repos/issaknot/shop/contents/images/forms');
-    const data = await response.json();
-    data.forEach(function(file) {
-        var img = document.createElement("img");
-        img.src = file.download_url;
-        img.onclick = selectForm.bind(null, img);
-        document.getElementById("available_forms").appendChild(img);
-      });
-}
-
-async function load_available_colors() {
-    const response = await fetch('https://api.github.com/repos/issaknot/shop/contents/images/colors');
-    const data = await response.json();
-    data.forEach(function(file) {
-        var img = document.createElement("img");
-        img.src = file.download_url;
-        img.onclick = selectColor.bind(null, img);
-        document.getElementById("available_colors").appendChild(img);
-        });
-}
-
 function add_submit_listener() {
     let form = document.getElementById("order_form");
     form.addEventListener("submit", function (event) {
@@ -50,17 +28,70 @@ function add_submit_listener() {
 }
 
 function setupContent(){
-    load_available_colors()
-    load_available_forms()
     add_submit_listener();
+    load_forms_from_dropbox();
+    load_colors_from_dropbox();
 }
 
+function load_colors_from_dropbox(){
+  const client = authenticate_dropbox_client();
+  
+  client.filesListFolder({path: '/colors'}).then(function(response) {
+    var cursor = response.cursor;
+    var has_more = response.has_more;
+    processEntries(response.entries, client, "available_colors");
+    while(has_more) {
+        client.listFolderContinue({cursor: cursor}).then(function(response) {
+            cursor = response.cursor;
+            has_more = response.has_more;
+            processEntries(response.entries, client, "available_colors");
+        });
+      }
+  });
+}
+
+function load_forms_from_dropbox(){
+  const client = authenticate_dropbox_client();
+  
+  client.filesListFolder({path: '/forms'}).then(function(response) {
+    var cursor = response.cursor;
+    var has_more = response.has_more;
+    processEntries(response.entries, client, "available_forms");
+    while(has_more) {
+        client.listFolderContinue({cursor: cursor}).then(function(response) {
+            cursor = response.cursor;
+            has_more = response.has_more;
+            processEntries(response.entries, client, "available_forms");
+        });
+      }
+  });
+}
+
+function authenticate_dropbox_client(){
+   const client = new Dropbox.Dropbox({
+    accessToken: 'sl.BXe9Ehftf5VRp4l8g7DZUQXPsnQkoCQWE9w6oHzj7Li8DCCW10aWYYFEw5Ngq36JG24tzpDE_8c_k1R5nGVsZXnqnkfdZps1DHw7k24aQQSl8V1gUYkzL5IKcHQRu1qr6DLl1hQ',
+    fetch: fetch
+  });
+  return client
+}
+
+function processEntries(entries, dbclient, eleid) {
+  for (var i = 0; i < entries.length; i++) {
+      var file = entries[i];
+      if (file['.tag'] === 'file') {
+          dbclient.filesDownload({path: file.path_display}).then(function(response) {
+              var data = response.fileBlob;
+              var imgUrl = URL.createObjectURL(data);
+              var image = document.createElement("img");
+              image.src = imgUrl;
+              image.onclick = selectColor.bind(null, image);
+              document.getElementById(eleid).appendChild(image);
+          }).catch(function(error) {
+              console.log(error);
+          });
+      }
+  }
+}
+
+
 window.onload = setupContent();
-
-var client = new Dropbox.Client({ key: "sl.BXcucg3tq1cM52Tbkv2nLGZ2gecHoiG-Pr3rEQif1cv7jNknYyk_ODErDXLJkMTAOK43QpIyIS6Z33duOcT-9IPHUWsZeQaWanhCHQMvEHg_kyLDnbANe9OJO9N2QFDBW0SOg_g" });
-
-
-
-
-
-

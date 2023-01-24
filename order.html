@@ -4,7 +4,6 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/4.0.30/Dropbox-sdk.js" integrity="sha256-B2oONvdKJ3qkdcGzlVZwhFz55Pk6/+clzI+9hbK1C24=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
-    <script src="script/order.js"></script>
     <title>Issaknot</title>
   </head>
   <body>
@@ -14,9 +13,9 @@
       <a href="in_stock.html">In Stock</a>
       <a href="gallery.html">Gallery</a>
     </div>
-    <h1>choose your shape</h1>
+    <h1>Wähle deine Form</h1>
     <div id="available_forms"></div>
-    <h1>choose your color</h1>
+    <h1>Wähle deine Farbe</h1>
     <div id="available_colors"></div>
     <p></p>
     <div class="form-container">
@@ -24,12 +23,15 @@
         <label>Your email:</label>
         <input type="email" name="email" required>
         <input type="hidden" name="message" id="order_message">
-        <button type="submit">order</button>
+        <button type="submit">Send</button>
       </form>
     </div>
     <div id="footer">
       <img id="social-link" src="images/others/depop.PNG" >
       <img id="social-link" src="images/others/Instagram_icon.png">
   </div>
-  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/4.0.30/Dropbox-sdk.js" integrity="sha256-B2oONvdKJ3qkdcGzlVZwhFz55Pk6/+clzI+9hbK1C24=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
+    <script src="script/order.js"></script>
+    </body>
 </html>
