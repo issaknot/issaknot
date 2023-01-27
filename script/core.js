@@ -59,44 +59,64 @@ function load_forms_from_dropbox(){
 
 function processColors(entries) {
   let eleid = "available_colors"
+  let images = [];
+  let promises = []
   for (var i = 0; i < entries.length; i++) {
       var file = entries[i];
       if (file['.tag'] === 'file') {
-        dbclient.filesDownload({path: file.path_display}).then(function(response) {
-              var data = response.fileBlob;
-              var imgUrl = URL.createObjectURL(data);
-              var image = document.createElement("img");
-              image.classList.add("color_image")
-              image.src = imgUrl;
-              image.id = response.name
-              image.onclick = selectColor.bind(null, image);
-              document.getElementById(eleid).appendChild(image);
-          }).catch(function(error) {
-              console.log(error);
-          });
+        promises.push(dbclient.filesDownload({path: file.path_display}))
       }
   }
+  Promise.all(promises)
+  .then( function(responses) {
+    for (var i = 0; i < responses.length; i++) {
+      var data = responses[i].fileBlob;
+      var imgUrl = URL.createObjectURL(data);
+      var image = document.createElement("img");
+      image.classList.add("color_image")
+      image.src = imgUrl;
+      image.id = responses[i].name
+      images.push(image)
+    }
+    for(var i = 0; i < images.length; i++) {
+      images[i].onclick = selectColor.bind(null, images[i]);
+      document.getElementById(eleid).appendChild(images[i]);
+    }
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
 }
 
 function processForms(entries) {
   let eleid = "available_forms"
+  let images = [];
+  let promises = []
   for (var i = 0; i < entries.length; i++) {
       var file = entries[i];
       if (file['.tag'] === 'file') {
-        dbclient.filesDownload({path: file.path_display}).then(function(response) {
-              var data = response.fileBlob;
-              var imgUrl = URL.createObjectURL(data);
-              var image = document.createElement("img");
-              image.classList.add("form_image")
-              image.src = imgUrl;
-              image.id = response.name
-              image.onclick = selectForm.bind(null, image);
-              document.getElementById(eleid).appendChild(image);
-          }).catch(function(error) {
-              console.log(error);
-          });
+        promises.push(dbclient.filesDownload({path: file.path_display}))
       }
   }
+  Promise.all(promises)
+  .then( function(responses) {
+    for (var i = 0; i < responses.length; i++) {
+      var data = responses[i].fileBlob;
+      var imgUrl = URL.createObjectURL(data);
+      var image = document.createElement("img");
+      image.classList.add("form_image")
+      image.src = imgUrl;
+      image.id = responses[i].name
+      images.push(image)
+    }
+    for(var i = 0; i < images.length; i++) {
+      images[i].onclick = selectColor.bind(null, images[i]);
+      document.getElementById(eleid).appendChild(images[i]);
+    }
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
 }
 
 function refresh_access_token(){
@@ -141,6 +161,7 @@ function add_navbar_listener(){
   const navMenu = document.querySelector(".nav");
   const navOverlay = document.querySelector(".nav-overlay");
   const navButton = document.querySelector(".nav-btn");
+  const loadingScreen = document.getElementById('loading-screen');
 
   navButton.addEventListener("click", () => {
       navMenu.classList.add("nav-open");
@@ -162,7 +183,7 @@ function add_navbar_listener(){
   })
 
   document.querySelector("#link2").addEventListener("click", () => {
-    subsiteContent.innerHTML = order_form_content
+    subsiteContent.innerHTML = order_form_content;
     add_submit_listener();
     load_forms_from_dropbox();
     load_colors_from_dropbox();
@@ -229,3 +250,9 @@ let order_form_content = `
 let home_content = `
 <h1>Hoi :)</h1>
 <img src="images/me_selfie.png" alt="pic_of_me">`;
+
+let loading = `
+<div id="loading-screen">
+<div class="loading-spinner"></div>
+<p>Loading...</p>
+</div>`;
