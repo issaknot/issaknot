@@ -1,3 +1,9 @@
+@media (max-width: 768px) {
+    .top-row {
+      --top-row-height: 150px;
+    }
+  }
+
 body {
     --top-row-height: 110px;
 
