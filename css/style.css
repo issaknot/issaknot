@@ -1,5 +1,5 @@
 body {
-    --top-row-height: 60px;
+    --top-row-height: 110px;
 
     margin: 0;
     margin-top: var(--top-row-height);
