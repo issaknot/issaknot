@@ -66,6 +66,7 @@ function processColors(entries) {
               var data = response.fileBlob;
               var imgUrl = URL.createObjectURL(data);
               var image = document.createElement("img");
+              image.classList.add("color_image")
               image.src = imgUrl;
               image.id = response.name
               image.onclick = selectColor.bind(null, image);
@@ -86,6 +87,7 @@ function processForms(entries) {
               var data = response.fileBlob;
               var imgUrl = URL.createObjectURL(data);
               var image = document.createElement("img");
+              image.classList.add("form_image")
               image.src = imgUrl;
               image.id = response.name
               image.onclick = selectForm.bind(null, image);
@@ -130,10 +132,39 @@ function authenticate_dropbox_client(){
  return client
 }
 
+function test(){
+  console.log("clicked")
+}
+
+function add_navbar_listener(){
+
+  const navMenu = document.querySelector(".nav");
+  const navOverlay = document.querySelector(".nav-overlay");
+  const navButton = document.querySelector(".nav-btn");
+
+  navButton.addEventListener("click", () => {
+      navMenu.classList.add("nav-open");
+      navOverlay.classList.add("nav-overlay-open");
+      
+  });
+
+  navOverlay.addEventListener("click", () => {
+      navMenu.classList.remove("nav-open");
+      navOverlay.classList.remove("nav-overlay-open");
+  });
+
+  const navItem1 = document.querySelector(".nav-link#1")
+
+  navItem1.addEventListener("click", () => {
+    
+  })
+}
+
 window.onload = setupContent();
 
 let accessToken;
 let dbclient
+
 async function setupContent(){
   try {
     accessToken = await refresh_access_token()
@@ -141,8 +172,8 @@ async function setupContent(){
   } catch (error) {
     console.error(error)
   } 
-  
   load_forms_from_dropbox();
   load_colors_from_dropbox();
   add_submit_listener();
+  add_navbar_listener();
 }
