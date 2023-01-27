@@ -153,10 +153,45 @@ function add_navbar_listener(){
       navOverlay.classList.remove("nav-overlay-open");
   });
 
-  const navItem1 = document.querySelector(".nav-link#1")
+  const subsiteContent = document.querySelector(".subsite_content")
 
-  navItem1.addEventListener("click", () => {
-    
+  document.querySelector("#link1").addEventListener("click", () => {
+    subsiteContent.innerHTML = home_content
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link2").addEventListener("click", () => {
+    subsiteContent.innerHTML = order_form_content
+    add_submit_listener();
+    load_forms_from_dropbox();
+    load_colors_from_dropbox();
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link3").addEventListener("click", () => {
+    subsiteContent.innerHTML = ""
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link4").addEventListener("click", () => {
+    subsiteContent.innerHTML = ""
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link5").addEventListener("click", () => {
+    window.open("https://www.instagram.com/issaknot/")
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link6").addEventListener("click", () => {
+    window.open("https://www.depop.com/isabellekoller/")
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
   })
 }
 
@@ -172,8 +207,25 @@ async function setupContent(){
   } catch (error) {
     console.error(error)
   } 
-  load_forms_from_dropbox();
-  load_colors_from_dropbox();
-  add_submit_listener();
   add_navbar_listener();
+  document.querySelector(".subsite_content").innerHTML = home_content
 }
+
+let order_form_content = `
+    <h1>Wähle deine Form</h1>
+    <div id="available_forms"></div>
+    <h1>Wähle deine Farbe</h1>
+    <div id="available_colors"></div>
+    <p></p>
+    <div class="form-container">
+      <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
+        <label>Your email:</label>
+        <input type="email" name="email" required>
+        <input type="hidden" name="message" id="order_message">
+        <button type="submit">Send</button>
+      </form>
+    </div>`;
+
+let home_content = `
+<h1>Hoi :)</h1>
+<img src="images/me_selfie.png" alt="pic_of_me">`;
