@@ -84,6 +84,7 @@ function processColors(entries) {
       images[i].onclick = selectColor.bind(null, images[i]);
       document.getElementById(eleid).appendChild(images[i]);
     }
+
   })
   .catch(function(error) {
     console.log(error);
@@ -116,6 +117,7 @@ function processForms(entries) {
       images[i].onclick = selectColor.bind(null, images[i]);
       document.getElementById(eleid).appendChild(images[i]);
     }
+    end_loading_screen();
   })
   .catch(function(error) {
     console.log(error);
@@ -191,6 +193,7 @@ function add_navbar_listener(){
   })
 
   document.querySelector("#link2").addEventListener("click", () => {
+    start_loading_screen();
     subsiteContent.innerHTML = order_form_content;
     add_submit_listener();
     load_forms_from_dropbox();
@@ -207,9 +210,9 @@ function add_navbar_listener(){
   })
 
   //GALLERY
-  document.querySelector("#link4").addEventListener("click", () => {
+  document.querySelector("#link4").addEventListener("click", async () => {
     subsiteContent.innerHTML = ""
-    setup_gallery();
+    await setup_gallery();
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
@@ -227,7 +230,7 @@ function add_navbar_listener(){
   })
 }
 
-function processGalleryImages(entries) {
+async function processGalleryImages(entries) {
   console.log(entries)
   let images = [];
   let promises = []
@@ -237,25 +240,28 @@ function processGalleryImages(entries) {
         promises.push(dbclient.filesDownload({path: file.path_display}))
       }
   }
-  Promise.all(promises)
+  await Promise.all(promises)
   .then( function(responses) {
-    for (var i = 0; i < responses.length; i++) {
-      var data = responses[i].fileBlob;
-      var imgUrl = URL.createObjectURL(data);
-      var figure = document.createElement("figure");
-      var image = document.createElement("img");
-      var caption = document.createElement("figcaption");
-      if(responses[i].name.includes("#")){
-        caption.innerHTML = responses[i].name.replace(/.\w+$/, "").replaceAll("#", " #")
+    requestAnimationFrame(() => {
+      for (var i = 0; i < responses.length; i++) {
+        var data = responses[i].fileBlob;
+        var imgUrl = URL.createObjectURL(data);
+        var figure = document.createElement("figure");
+        var image = document.createElement("img");
+        var caption = document.createElement("figcaption");
+        if(responses[i].name.includes("#")){
+          caption.innerHTML = responses[i].name.replace(/.\w+$/, "").replaceAll("#", " #")
+        }
+        image.classList.add("gallery_image")
+        image.src = imgUrl;
+        image.id = responses[i].name
+        images.push(image)
+        figure.appendChild(image);
+        figure.appendChild(caption);
+        document.querySelector(".gallery").appendChild(figure);
       }
-      image.classList.add("gallery_image")
-      image.src = imgUrl;
-      image.id = responses[i].name
-      images.push(image)
-      figure.appendChild(image);
-      figure.appendChild(caption);
-      document.querySelector(".gallery").appendChild(figure);
-    }
+      end_loading_screen();
+    });
   })
   .catch(function(error) {
     console.log(error);
@@ -263,16 +269,17 @@ function processGalleryImages(entries) {
 }
 
 async function setup_gallery(){
-  let gallery = document.createElement("div")
-  gallery.classList.add("gallery")
+  start_loading_screen();
+  let gallery = document.createElement("div");
+  gallery.classList.add("gallery");
   document.querySelector(".subsite_content").appendChild(gallery);
-  setup_dropbox_client();
-  await dbclient.filesListFolder({path: '/gallery'}).then(function(response) {
+  await setup_dropbox_client();
+  await dbclient.filesListFolder({path: '/gallery'}).then(async function(response) {
     var cursor = response.cursor;
     var has_more = response.has_more;
     processGalleryImages(response.entries);
     while(has_more) {
-      dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
+      await dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
             cursor = response.cursor;
             has_more = response.has_more;
             processGalleryImages(response.entries);
@@ -281,14 +288,28 @@ async function setup_gallery(){
   });
 }
 
-window.onload = setupContent();
+function start_loading_screen(){ 
+  const body = document.querySelector('body');
+  const loader = document.createElement('div');
+  loader.classList.add('loader');
+  body.prepend(loader);
+}
 
+function end_loading_screen(){
+  const loader = document.querySelector(".loader");
+    document.body.removeChild(loader)
+}
 
 async function setupContent(){
   await setup_dropbox_client();
   add_navbar_listener();
   document.querySelector(".subsite_content").innerHTML = home_content
 }
+
+document.addEventListener("DOMContentLoaded", function(){
+  setupContent();
+});
+
 
 let order_form_content = `
     <h1>Wähle deine Form</h1>

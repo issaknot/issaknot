@@ -25,7 +25,7 @@ h1 {
   
 .top-row{
     position: fixed;
-    z-index: 10;
+    z-index: 8;
     top: 0;
     left: 0;
     width: 100%;
@@ -60,6 +60,7 @@ h1 {
 
 .nav {
    --nav-width: 300px;
+   z-index: 10;
    position: fixed;
    top: 0;
    left: 0;
@@ -92,6 +93,7 @@ h1 {
 }
 
 .nav-overlay {
+    z-index: 9;
     display: none;
     position: fixed;
     top: 0;
@@ -106,8 +108,8 @@ h1 {
 }
 
 .form_image, .color_image {
-    height: 80px;
-    width: 80px;
+    height: 160px;
+    width: 160px;
 }
 
 .nav-link img {
@@ -167,3 +169,35 @@ figcaption {
 .subsite_content {
     margin-top: calc(var(--top-row-height)/2); /* adjust to the height of the top-row div */
 }
+
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #333333;
+    transition: opacity 0.75s, visibility 0.75s;
+  }
+  
+  .loader::after {
+    content: "";
+    width: 75px;
+    height: 75px;
+    border: 15px solid #dddddd;
+    border-top-color: #009578;
+    border-radius: 50%;
+    animation: loading 0.75s ease infinite;
+  }
+  
+  @keyframes loading {
+    from {
+      transform: rotate(0turn);
+    }
+    to {
+      transform: rotate(1turn);
+    }
+  }
