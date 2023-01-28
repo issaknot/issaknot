@@ -1,5 +1,7 @@
-var selectedForm = null;
-var selectedColor = null;
+let selectedForm = null;
+let selectedColor = null;
+let accessToken;
+let dbclient
 
 function selectForm(image) {
   if(selectedForm!=null){ 
@@ -101,6 +103,7 @@ function processForms(entries) {
   Promise.all(promises)
   .then( function(responses) {
     for (var i = 0; i < responses.length; i++) {
+      console.log(responses[i])
       var data = responses[i].fileBlob;
       var imgUrl = URL.createObjectURL(data);
       var image = document.createElement("img");
@@ -152,8 +155,13 @@ function authenticate_dropbox_client(){
  return client
 }
 
-function test(){
-  console.log("clicked")
+async function setup_dropbox_client(){
+  try {
+    accessToken = await refresh_access_token()
+    dbclient = authenticate_dropbox_client()
+  } catch (error) {
+    console.error(error)
+  } 
 }
 
 function add_navbar_listener(){
@@ -161,7 +169,7 @@ function add_navbar_listener(){
   const navMenu = document.querySelector(".nav");
   const navOverlay = document.querySelector(".nav-overlay");
   const navButton = document.querySelector(".nav-btn");
-  const loadingScreen = document.getElementById('loading-screen');
+  const loadingScreen = document.getElementById('loading-screen'); //TODO
 
   navButton.addEventListener("click", () => {
       navMenu.classList.add("nav-open");
@@ -191,43 +199,93 @@ function add_navbar_listener(){
     navOverlay.classList.remove("nav-overlay-open");
   })
 
+  //STOCK
   document.querySelector("#link3").addEventListener("click", () => {
     subsiteContent.innerHTML = ""
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
 
+  //GALLERY
   document.querySelector("#link4").addEventListener("click", () => {
     subsiteContent.innerHTML = ""
+    setup_gallery();
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
 
   document.querySelector("#link5").addEventListener("click", () => {
-    window.open("https://www.instagram.com/issaknot/")
+    window.open("https://www.depop.com/isabellekoller/")
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
 
   document.querySelector("#link6").addEventListener("click", () => {
-    window.open("https://www.depop.com/isabellekoller/")
+    window.open("https://www.instagram.com/issaknot/")
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
 }
 
+function processGalleryImages(entries) {
+  console.log(entries)
+  let images = [];
+  let promises = []
+  for (var i = 0; i < entries.length; i++) {
+      var file = entries[i];
+      if (file['.tag'] === 'file') {
+        promises.push(dbclient.filesDownload({path: file.path_display}))
+      }
+  }
+  Promise.all(promises)
+  .then( function(responses) {
+    for (var i = 0; i < responses.length; i++) {
+      var data = responses[i].fileBlob;
+      var imgUrl = URL.createObjectURL(data);
+      var figure = document.createElement("figure");
+      var image = document.createElement("img");
+      var caption = document.createElement("figcaption");
+      if(responses[i].name.includes("#")){
+        caption.innerHTML = responses[i].name.replace(/.\w+$/, "").replaceAll("#", " #")
+      }
+      image.classList.add("gallery_image")
+      image.src = imgUrl;
+      image.id = responses[i].name
+      images.push(image)
+      figure.appendChild(image);
+      figure.appendChild(caption);
+      document.querySelector(".gallery").appendChild(figure);
+    }
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
+}
+
+async function setup_gallery(){
+  let gallery = document.createElement("div")
+  gallery.classList.add("gallery")
+  document.querySelector(".subsite_content").appendChild(gallery);
+  setup_dropbox_client();
+  await dbclient.filesListFolder({path: '/gallery'}).then(function(response) {
+    var cursor = response.cursor;
+    var has_more = response.has_more;
+    processGalleryImages(response.entries);
+    while(has_more) {
+      dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
+            cursor = response.cursor;
+            has_more = response.has_more;
+            processGalleryImages(response.entries);
+        });
+      }
+  });
+}
+
 window.onload = setupContent();
 
-let accessToken;
-let dbclient
 
 async function setupContent(){
-  try {
-    accessToken = await refresh_access_token()
-    dbclient = authenticate_dropbox_client()
-  } catch (error) {
-    console.error(error)
-  } 
+  await setup_dropbox_client();
   add_navbar_listener();
   document.querySelector(".subsite_content").innerHTML = home_content
 }
