@@ -114,7 +114,7 @@ function processForms(entries) {
       images.push(image)
     }
     for(var i = 0; i < images.length; i++) {
-      images[i].onclick = selectColor.bind(null, images[i]);
+      images[i].onclick = selectForm.bind(null, images[i]);
       document.getElementById(eleid).appendChild(images[i]);
     }
     end_loading_screen();
