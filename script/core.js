@@ -205,7 +205,7 @@ function add_navbar_listener(){
   document.querySelector("#link3").addEventListener("click", async () => {
     
     subsiteContent.innerHTML = ""
-    await setup_stock().then(createProductGallery).then(addZoomLogic)
+    await setup_stock()
 
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
@@ -266,7 +266,6 @@ async function createProductGallery(images) {
       for (var i = 0; i < responses.length; i++) {
         const productGroups = {};
           for (var i = 0; i < responses.length; i++) {
-            console.log(responses[i].name.split(".")[0].split("_")[0])
             const productName = responses[i].name.split(".")[0].split("_")[0];
             if (!productGroups[productName]) {
               productGroups[productName] = [];
@@ -281,18 +280,19 @@ async function createProductGallery(images) {
             const productGallery = document.createElement("div");
             productGallery.classList.add("image-grid")
             for (const productImage of productGroups[productName]) {
-                console.log(productImage)
                 const productImageElement = document.createElement("img");
                 const data = productImage.fileBlob;
                 const imgUrl = URL.createObjectURL(data);
                 productImageElement.src = imgUrl;
                 productImageElement.style.height = "100px";
+                productImageElement.addEventListener("click", () => showModal(productImageElement.src));
                 productGallery.appendChild(productImageElement);
             }
             contentDiv.appendChild(productGallery);
           }
       }
       end_loading_screen();
+      addZoomLogic();
     });
   })
   .catch(function(error) {
@@ -310,7 +310,7 @@ function addZoomLogic(){
   img.classList.add("img-zoom");
 
   imgModal.appendChild(img);
-  document.body.appendChild(imgModal);
+  document.querySelector(".subsite_content").appendChild(imgModal);
 
   const showModal = (src) => {
     img.src = src;
@@ -325,6 +325,7 @@ function addZoomLogic(){
 
   const images = document.querySelectorAll("img");
   for (const image of images) {
+    console.log(image)
     image.addEventListener("click", () => showModal(image.src));
   }   
 }
