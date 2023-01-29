@@ -175,8 +175,7 @@ function add_navbar_listener(){
 
   navButton.addEventListener("click", () => {
       navMenu.classList.add("nav-open");
-      navOverlay.classList.add("nav-overlay-open");
-      
+      navOverlay.classList.add("nav-overlay-open"); 
   });
 
   navOverlay.addEventListener("click", () => {
@@ -203,8 +202,11 @@ function add_navbar_listener(){
   })
 
   //STOCK
-  document.querySelector("#link3").addEventListener("click", () => {
+  document.querySelector("#link3").addEventListener("click", async () => {
+    
     subsiteContent.innerHTML = ""
+    await setup_stock().then(createProductGallery).then(addZoomLogic)
+
     navMenu.classList.remove("nav-open");
     navOverlay.classList.remove("nav-overlay-open");
   })
@@ -230,12 +232,109 @@ function add_navbar_listener(){
   })
 }
 
+async function setup_stock(){
+  start_loading_screen();
+  await setup_dropbox_client();
+  await dbclient.filesListFolder({path: '/stock'}).then(async function(response) {
+    var cursor = response.cursor;
+    var has_more = response.has_more;
+    createProductGallery(response.entries);
+    while(has_more) {
+      await dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
+            cursor = response.cursor;
+            has_more = response.has_more;
+            createProductGallery(response.entries);
+        });
+      }
+  });
+}
+
+async function createProductGallery(images) {
+  console.log("images...")
+  let promises = []
+  for (var i = 0; i < images.length; i++) {
+    var file = images[i];
+    console.log(file)
+    if (file['.tag'] === 'file') {
+      promises.push(dbclient.filesDownload({path: file.path_display}))
+    }
+  }
+
+  await Promise.all(promises)
+  .then( function(responses) {
+    requestAnimationFrame(() => {
+      for (var i = 0; i < responses.length; i++) {
+        const productGroups = {};
+          for (var i = 0; i < responses.length; i++) {
+            console.log(responses[i].name.split(".")[0].split("_")[0])
+            const productName = responses[i].name.split(".")[0].split("_")[0];
+            if (!productGroups[productName]) {
+              productGroups[productName] = [];
+            }
+            productGroups[productName].push(responses[i]);
+          }
+          const contentDiv = document.querySelector(".subsite_content");
+          for (const productName in productGroups) {
+            const productHeader = document.createElement("h3");
+            productHeader.innerText = productName;
+            contentDiv.appendChild(productHeader);
+            const productGallery = document.createElement("div");
+            productGallery.classList.add("image-grid")
+            for (const productImage of productGroups[productName]) {
+                console.log(productImage)
+                const productImageElement = document.createElement("img");
+                const data = productImage.fileBlob;
+                const imgUrl = URL.createObjectURL(data);
+                productImageElement.src = imgUrl;
+                productImageElement.style.height = "100px";
+                productGallery.appendChild(productImageElement);
+            }
+            contentDiv.appendChild(productGallery);
+          }
+      }
+      end_loading_screen();
+    });
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
+
+  
+}
+
+function addZoomLogic(){
+  const imgModal = document.createElement("div");
+  imgModal.classList.add("img-modal");
+
+  const img = document.createElement("img");
+  img.classList.add("img-zoom");
+
+  imgModal.appendChild(img);
+  document.body.appendChild(imgModal);
+
+  const showModal = (src) => {
+    img.src = src;
+    imgModal.style.display = "flex";
+  };
+
+  const hideModal = () => {
+    imgModal.style.display = "none";
+  };
+
+  imgModal.addEventListener("click", hideModal);
+
+  const images = document.querySelectorAll("img");
+  for (const image of images) {
+    image.addEventListener("click", () => showModal(image.src));
+  }   
+}
+
 async function processGalleryImages(entries) {
-  console.log(entries)
   let images = [];
   let promises = []
   for (var i = 0; i < entries.length; i++) {
       var file = entries[i];
+      console.log(file)
       if (file['.tag'] === 'file') {
         promises.push(dbclient.filesDownload({path: file.path_display}))
       }
@@ -244,6 +343,7 @@ async function processGalleryImages(entries) {
   .then( function(responses) {
     requestAnimationFrame(() => {
       for (var i = 0; i < responses.length; i++) {
+        console.log(responses[i])
         var data = responses[i].fileBlob;
         var imgUrl = URL.createObjectURL(data);
         var figure = document.createElement("figure");
