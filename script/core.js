@@ -19,14 +19,53 @@ function selectColor(image) {
   selectedColor.classList.add("selected_color");
 }
 
-function add_submit_listener() {
-    let form = document.getElementById("order_form");
-    form.addEventListener("submit", function (event) {
-        let desiredform = document.getElementsByClassName('selected_form')[0].id;
-        let desiredcolor = document.getElementsByClassName('selected_color')[0].id;
-        let orderDetails = `The visitor selected form = ${desiredform} and color = ${desiredcolor}`;
-        document.getElementById("order_message").value = orderDetails;
-    });
+function add_order_form_listeners(){
+  const openModalBtn = document.getElementById("openModalBtn");
+  const modal = document.getElementById("myModal");
+  const submitBtn = document.getElementById("submitBtn");
+  const emailInput = document.getElementById("email");
+
+  openModalBtn.addEventListener("click", function() {
+    modal.style.display = "block";
+    let new_element = null;
+    const container = document.querySelector(".current_selection")
+    const form = document.querySelector(".selected_form")
+    const color = document.querySelector(".selected_color")
+    const scheme = document.querySelector(".selected_scheme")
+    const personalise = document.querySelector(".selected_personalise")
+    const selections = [form, color, scheme, personalise];
+
+    selections.forEach(element => {
+      if(element){
+      new_element = document.createElement("img") 
+      new_element.src = element.src
+      container.appendChild(new_element)
+    }
+    })
+
+  });
+
+  window.addEventListener("click", function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  });
+
+  emailInput.addEventListener("input", function() {
+    if (emailInput.value) {
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = true;
+    }
+  });
+
+  let form = document.getElementById("order_form");
+  form.addEventListener("submit", function (event) {
+      let desiredform = document.getElementsByClassName('selected_form')[0].id;
+      let desiredcolor = document.getElementsByClassName('selected_color')[0].id;
+      let orderDetails = `The visitor selected form = ${desiredform} and color = ${desiredcolor}`;
+      document.getElementById("order_message").value = orderDetails;
+  });
 }
 
 function load_colors_from_dropbox(){
@@ -194,7 +233,7 @@ function add_navbar_listener(){
   document.querySelector("#link2").addEventListener("click", () => {
     start_loading_screen();
     subsiteContent.innerHTML = order_form_content;
-    add_submit_listener();
+    add_order_form_listeners();
     load_forms_from_dropbox();
     load_colors_from_dropbox();
     navMenu.classList.remove("nav-open");
@@ -412,19 +451,37 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 
+
 let order_form_content = `
-    <h1>Wähle deine Form</h1>
-    <div id="available_forms"></div>
-    <h1>Wähle deine Farbe</h1>
-    <div id="available_colors"></div>
-    <p></p>
-    <div class="form-container">
-      <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
-        <label>Your email:</label>
-        <input type="email" name="email" required>
-        <input type="hidden" name="message" id="order_message">
-        <button type="submit">Send</button>
-      </form>
+    
+    <div class="content__container">
+      <p class="content__normal-font">Actually, I crochet almost daily and my biggest problem is that I run out of ideas. So if you have a great idea how your dream crochet bag could look like, I would love to hear about it!</p>
+      <div class="content__horizontal-spacer"></div>
+      <p class="content__heading">model</p>
+      <div id="available_forms"></div>
+      <p class="content__heading">colour</p>
+      <div id="available_colors"></div>
+      <p class="content__heading">colour scheme</p>
+      <div id="available_color_schemes"></div>
+      <p class="content__heading">personalise</p>
+      <div id="available_colors"></div>
+      <div style="height: 10vh;"></div>
+      <button id="openModalBtn">Submit</button>
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <label>Your selection:</label>
+          <div class="current_selection">
+          </div>
+          <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
+            <label for="comments">Comments:</label>
+            <textarea id="comments" type="text" name="comments"></textarea>
+            <label for="email">Your email (required):</label>
+            <input type="email" id="email" name="email" required>
+            <input type="hidden" name="message" id="order_message">
+            <button type="submit" id="submitBtn" disabled>Submit</button>
+          </form>
+        </div>
+      </div>
     </div>`;
 
 let home_content = `

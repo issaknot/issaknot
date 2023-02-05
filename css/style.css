@@ -25,10 +25,24 @@
 
 }
 
-h1 {
-    text-align: center;
+.content__container{
+  width: 60vw;
 }
-  
+
+.content__normal-font{
+  font-size: 28px;
+}
+
+.content__heading{
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.content__horizontal-spacer {
+  height: 1vh;
+}
+
+
 .top-row{
     position: fixed;
     z-index: 8;
@@ -225,5 +239,63 @@ figcaption {
     max-width: 70%;
     max-height: 70%;
     align-self: center;
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%;
+    height: 40%;
+  }
+
+  .current_selection {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+.current_selection img {
+    height: 80px;
+    width: 80px;
+    margin: 10px;
+}
+  
+  .modal-content label{
+    font-size: 18px;
+  }
+
+  #comments {
+    height: 200px;
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+    
+  #email {
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  #submitBtn {
+    display: block;
+    margin: 20px auto;
   }
   
