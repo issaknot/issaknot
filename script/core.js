@@ -1,22 +1,131 @@
-let selectedForm = null;
-let selectedColor = null;
+//////////////////////////// IMPORTS ////////////////////////////
+
+import { addZoomLogic } from "./zoom.js";
+import { start_loading_screen, end_loading_screen} from "./loading.js";
+import { refresh_access_token, authenticate_dropbox_client } from "./dropbox.js";
+
+
+//////////////////////////// SETUP INSTRUCTIONS ////////////////////////////
+
+async function setup_dropbox_client(){
+  try {
+    accessToken = await refresh_access_token()
+    dbclient = authenticate_dropbox_client(accessToken)
+  } catch (error) {
+    console.error(error)
+  } 
+}
+// this variables are required for the dropbox API
+// the access token must be updated every hour
+// since the access is restricted (read only rights) the token is being refreshed frequently
 let accessToken;
 let dbclient
 
-function selectForm(image) {
-  if(selectedForm!=null){ 
-    selectedForm.classList.remove("selected_form");
-  }
-  selectedForm = image;
-  selectedForm.classList.add("selected_form");
+// wait until domcontent is loaded, then call the initiating fuction
+document.addEventListener("DOMContentLoaded", function(){
+  setupContent();
+});
+
+async function setupContent(){
+  await setup_dropbox_client();
+  add_navbar_listener();
+  document.querySelector(".subsite_content").innerHTML = home_content
 }
 
-function selectColor(image) {
-  if(selectedColor!=null){ 
-    selectedColor.classList.remove("selected_color");
+
+//////////////////////////// NAVIGATION BAR ////////////////////////////
+
+function add_navbar_listener(){
+
+  const navMenu = document.querySelector(".nav");
+  const navOverlay = document.querySelector(".nav-overlay");
+  const navButton = document.querySelector(".nav-btn");
+  const loadingScreen = document.getElementById('loading-screen'); //TODO
+
+  navButton.addEventListener("click", () => {
+      navMenu.classList.add("nav-open");
+      navOverlay.classList.add("nav-overlay-open"); 
+  });
+
+  navOverlay.addEventListener("click", () => {
+      navMenu.classList.remove("nav-open");
+      navOverlay.classList.remove("nav-overlay-open");
+  });
+
+  const subsiteContent = document.querySelector(".subsite_content")
+
+  document.querySelector("#link1").addEventListener("click", () => {
+    subsiteContent.innerHTML = home_content
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link2").addEventListener("click", async () => {
+    start_loading_screen();
+    subsiteContent.innerHTML = order_form_content;
+    add_order_form_listeners();
+    const paths = ['/colors', '/forms', '/schemes', '/personalise'];
+    const eleids = ['available_colors', 'available_forms','available_schemes','available_personalise'];
+    const onClickParaOne = ["selected_color", "selected_form", "selected_scheme", "selected_personalise"]
+    const onClickParaTwo = [selectedColor, selectedForm, selectedScheme, selectedPersonalise]
+    
+    for (let i = 0; i < paths.length; i++) {
+      await loadFromDropbox(paths[i], eleids[i], onClickParaOne[i], onClickParaTwo[i]);
+    }
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+
+    end_loading_screen();
+
+  })
+
+  //STOCK
+  document.querySelector("#link3").addEventListener("click", async () => {
+    
+    subsiteContent.innerHTML = ""
+    await setup_stock()
+
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  //GALLERY
+  document.querySelector("#link4").addEventListener("click", async () => {
+    subsiteContent.innerHTML = ""
+    await setup_gallery();
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link5").addEventListener("click", () => {
+    window.open("https://www.depop.com/isabellekoller/")
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+
+  document.querySelector("#link6").addEventListener("click", () => {
+    window.open("https://www.instagram.com/issaknot/")
+    navMenu.classList.remove("nav-open");
+    navOverlay.classList.remove("nav-overlay-open");
+  })
+}
+
+
+//////////////////////////// ORDER ////////////////////////////
+
+//this variables keep track of the selected images
+let selectedForm = null;
+let selectedColor = null;
+let selectedScheme = null;
+let selectedPersonalise = null;
+
+function selectImage(image, className, selectedImage) {
+  if (selectedImage != null) {
+    selectedImage.classList.remove(className);
   }
-  selectedColor = image;
-  selectedColor.classList.add("selected_color");
+  selectedImage = image;
+  selectedImage.classList.add(className);
+  return selectedImage;
 }
 
 function add_order_form_listeners(){
@@ -68,208 +177,53 @@ function add_order_form_listeners(){
   });
 }
 
-function load_colors_from_dropbox(){
-  dbclient.filesListFolder({path: '/colors'}).then(function(response) {
+async function loadFromDropbox(path, eleid, onClickParaOne, onClickParaTwo) {
+  await dbclient.filesListFolder({path: path}).then(async function(response) {
     var cursor = response.cursor;
     var has_more = response.has_more;
-    processColors(response.entries);
+    processData(response.entries, eleid, onClickParaOne, onClickParaTwo);
     while(has_more) {
-      dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
-            cursor = response.cursor;
-            has_more = response.has_more;
-            processColors(response.entries);
-        });
-      }
+      await dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
+        cursor = response.cursor;
+        has_more = response.has_more;
+         processData(response.entries, eleid, onClickParaOne, onClickParaTwo);
+      });
+    }
   });
 }
 
-function load_forms_from_dropbox(){
-  dbclient.filesListFolder({path: '/forms'}).then(function(response) {
-    var cursor = response.cursor;
-    var has_more = response.has_more;
-    processForms(response.entries);
-    while(has_more) {
-      dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
-            cursor = response.cursor;
-            has_more = response.has_more;
-            processForms(response.entries);
-        });
-      }
-  });
-}
-
-function processColors(entries) {
-  let eleid = "available_colors"
+async function processData(entries, eleid, onClickParaOne, onClickParaTwo) {
   let images = [];
-  let promises = []
+  let promises = [];
   for (var i = 0; i < entries.length; i++) {
-      var file = entries[i];
-      if (file['.tag'] === 'file') {
-        promises.push(dbclient.filesDownload({path: file.path_display}))
-      }
+    var file = entries[i];
+    if (file['.tag'] === 'file') {
+      promises.push(dbclient.filesDownload({path: file.path_display}));
+    }
   }
-  Promise.all(promises)
-  .then( function(responses) {
-    for (var i = 0; i < responses.length; i++) {
-      var data = responses[i].fileBlob;
-      var imgUrl = URL.createObjectURL(data);
-      var image = document.createElement("img");
-      image.classList.add("color_image")
-      image.src = imgUrl;
-      image.id = responses[i].name
-      images.push(image)
-    }
-    for(var i = 0; i < images.length; i++) {
-      images[i].onclick = selectColor.bind(null, images[i]);
-      document.getElementById(eleid).appendChild(images[i]);
-    }
-
-  })
-  .catch(function(error) {
-    console.log(error);
-  });
-}
-
-function processForms(entries) {
-  let eleid = "available_forms"
-  let images = [];
-  let promises = []
-  for (var i = 0; i < entries.length; i++) {
-      var file = entries[i];
-      if (file['.tag'] === 'file') {
-        promises.push(dbclient.filesDownload({path: file.path_display}))
+  await Promise.all(promises)
+    .then( function(responses) {
+      for (var i = 0; i < responses.length; i++) {
+        var data = responses[i].fileBlob;
+        var imgUrl = URL.createObjectURL(data);
+        var image = document.createElement("img");
+        image.classList.add(`${eleid}_image`)
+        image.src = imgUrl;
+        image.id = responses[i].name;
+        images.push(image);
       }
-  }
-  Promise.all(promises)
-  .then( function(responses) {
-    for (var i = 0; i < responses.length; i++) {
-      console.log(responses[i])
-      var data = responses[i].fileBlob;
-      var imgUrl = URL.createObjectURL(data);
-      var image = document.createElement("img");
-      image.classList.add("form_image")
-      image.src = imgUrl;
-      image.id = responses[i].name
-      images.push(image)
-    }
-    for(var i = 0; i < images.length; i++) {
-      images[i].onclick = selectForm.bind(null, images[i]);
-      document.getElementById(eleid).appendChild(images[i]);
-    }
-    end_loading_screen();
-  })
-  .catch(function(error) {
-    console.log(error);
-  });
-}
-
-function refresh_access_token(){
-  return new Promise((resolve, reject) => {
-    let appkey = "53dorqe8v51i41q"
-    let appsecret = "ocy272lq4w0q1k3"
-    let refrestoken = "IhUaFM0MkQ4AAAAAAAAAAbPlW8JINEoLeXDl-DE9tT0WeE1iRrhpFdzUAYE1WBmJ"
-    fetch('https://api.dropboxapi.com/1/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'refresh_token=' + refrestoken 
-      + '&grant_type=refresh_token' 
-      + '&client_id=' + appkey 
-      + '&client_secret=' + appsecret
+      for(var i = 0; i < images.length; i++) {
+        images[i].onclick = selectImage.bind(null, images[i], onClickParaOne, onClickParaTwo);
+        document.getElementById(eleid).appendChild(images[i]);
+      }
     })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(data) {
-      resolve(data.access_token)
-    })
-    .catch(error => reject(error))
-  })
+    .catch(function(error) {
+      console.log(error);
+    });
 }
 
-function authenticate_dropbox_client(){
-  const client = new Dropbox.Dropbox({
-   accessToken: accessToken,
-   fetch: fetch
- });
- return client
-}
 
-async function setup_dropbox_client(){
-  try {
-    accessToken = await refresh_access_token()
-    dbclient = authenticate_dropbox_client()
-  } catch (error) {
-    console.error(error)
-  } 
-}
-
-function add_navbar_listener(){
-
-  const navMenu = document.querySelector(".nav");
-  const navOverlay = document.querySelector(".nav-overlay");
-  const navButton = document.querySelector(".nav-btn");
-  const loadingScreen = document.getElementById('loading-screen'); //TODO
-
-  navButton.addEventListener("click", () => {
-      navMenu.classList.add("nav-open");
-      navOverlay.classList.add("nav-overlay-open"); 
-  });
-
-  navOverlay.addEventListener("click", () => {
-      navMenu.classList.remove("nav-open");
-      navOverlay.classList.remove("nav-overlay-open");
-  });
-
-  const subsiteContent = document.querySelector(".subsite_content")
-
-  document.querySelector("#link1").addEventListener("click", () => {
-    subsiteContent.innerHTML = home_content
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-
-  document.querySelector("#link2").addEventListener("click", () => {
-    start_loading_screen();
-    subsiteContent.innerHTML = order_form_content;
-    add_order_form_listeners();
-    load_forms_from_dropbox();
-    load_colors_from_dropbox();
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-
-  //STOCK
-  document.querySelector("#link3").addEventListener("click", async () => {
-    
-    subsiteContent.innerHTML = ""
-    await setup_stock()
-
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-
-  //GALLERY
-  document.querySelector("#link4").addEventListener("click", async () => {
-    subsiteContent.innerHTML = ""
-    await setup_gallery();
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-
-  document.querySelector("#link5").addEventListener("click", () => {
-    window.open("https://www.depop.com/isabellekoller/")
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-
-  document.querySelector("#link6").addEventListener("click", () => {
-    window.open("https://www.instagram.com/issaknot/")
-    navMenu.classList.remove("nav-open");
-    navOverlay.classList.remove("nav-overlay-open");
-  })
-}
+//////////////////////////// STOCK ////////////////////////////
 
 async function setup_stock(){
   start_loading_screen();
@@ -341,32 +295,27 @@ async function createProductGallery(images) {
   
 }
 
-function addZoomLogic(){
-  const imgModal = document.createElement("div");
-  imgModal.classList.add("img-modal");
 
-  const img = document.createElement("img");
-  img.classList.add("img-zoom");
+//////////////////////////// GALLERY ////////////////////////////
 
-  imgModal.appendChild(img);
-  document.querySelector(".subsite_content").appendChild(imgModal);
-
-  const showModal = (src) => {
-    img.src = src;
-    imgModal.style.display = "flex";
-  };
-
-  const hideModal = () => {
-    imgModal.style.display = "none";
-  };
-
-  imgModal.addEventListener("click", hideModal);
-
-  const images = document.querySelectorAll("img");
-  for (const image of images) {
-    console.log(image)
-    image.addEventListener("click", () => showModal(image.src));
-  }   
+async function setup_gallery(){
+  start_loading_screen();
+  let gallery = document.createElement("div");
+  gallery.classList.add("gallery");
+  document.querySelector(".subsite_content").appendChild(gallery);
+  await setup_dropbox_client();
+  await dbclient.filesListFolder({path: '/gallery'}).then(async function(response) {
+    var cursor = response.cursor;
+    var has_more = response.has_more;
+    processGalleryImages(response.entries);
+    while(has_more) {
+      await dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
+            cursor = response.cursor;
+            has_more = response.has_more;
+            processGalleryImages(response.entries);
+        });
+      }
+  });
 }
 
 async function processGalleryImages(entries) {
@@ -408,81 +357,39 @@ async function processGalleryImages(entries) {
   });
 }
 
-async function setup_gallery(){
-  start_loading_screen();
-  let gallery = document.createElement("div");
-  gallery.classList.add("gallery");
-  document.querySelector(".subsite_content").appendChild(gallery);
-  await setup_dropbox_client();
-  await dbclient.filesListFolder({path: '/gallery'}).then(async function(response) {
-    var cursor = response.cursor;
-    var has_more = response.has_more;
-    processGalleryImages(response.entries);
-    while(has_more) {
-      await dbclient.listFolderContinue({cursor: cursor}).then(function(response) {
-            cursor = response.cursor;
-            has_more = response.has_more;
-            processGalleryImages(response.entries);
-        });
-      }
-  });
-}
 
-function start_loading_screen(){ 
-  const body = document.querySelector('body');
-  const loader = document.createElement('div');
-  loader.classList.add('loader');
-  body.prepend(loader);
-}
-
-function end_loading_screen(){
-  const loader = document.querySelector(".loader");
-    document.body.removeChild(loader)
-}
-
-async function setupContent(){
-  await setup_dropbox_client();
-  add_navbar_listener();
-  document.querySelector(".subsite_content").innerHTML = home_content
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-  setupContent();
-});
-
-
+//////////////////////////// HTML CONTENT ////////////////////////////
 
 let order_form_content = `
-    
-    <div class="content__container">
-      <p class="content__normal-font">Actually, I crochet almost daily and my biggest problem is that I run out of ideas. So if you have a great idea how your dream crochet bag could look like, I would love to hear about it!</p>
-      <div class="content__horizontal-spacer"></div>
-      <p class="content__heading">model</p>
-      <div id="available_forms"></div>
-      <p class="content__heading">colour</p>
-      <div id="available_colors"></div>
-      <p class="content__heading">colour scheme</p>
-      <div id="available_color_schemes"></div>
-      <p class="content__heading">personalise</p>
-      <div id="available_colors"></div>
-      <div style="height: 10vh;"></div>
-      <button id="openModalBtn">Submit</button>
-      <div id="myModal" class="modal">
-        <div class="modal-content">
-          <label>Your selection:</label>
-          <div class="current_selection">
-          </div>
-          <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
-            <label for="comments">Comments:</label>
-            <textarea id="comments" type="text" name="comments"></textarea>
-            <label for="email">Your email (required):</label>
-            <input type="email" id="email" name="email" required>
-            <input type="hidden" name="message" id="order_message">
-            <button type="submit" id="submitBtn" disabled>Submit</button>
-          </form>
+  <div class="content__container">
+    <p class="content__normal-font">Actually, I crochet almost daily and my biggest problem is that I run out of ideas. So if you have a great idea how your dream crochet bag could look like, I would love to hear about it!</p>
+    <div class="content__horizontal-spacer"></div>
+    <p class="content__heading">model</p>
+    <div id="available_forms"></div>
+    <p class="content__heading">colour</p>
+    <div id="available_colors"></div>
+    <p class="content__heading">colour scheme</p>
+    <div id="available_schemes"></div>
+    <p class="content__heading">personalise</p>
+    <div id="available_personalise"></div>
+    <div style="height: 10vh;"></div>
+    <button id="openModalBtn">Submit</button>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <label>Your selection:</label>
+        <div class="current_selection">
         </div>
+        <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
+          <label for="comments">Comments:</label>
+          <textarea id="comments" type="text" name="comments"></textarea>
+          <label for="email">Your email (required):</label>
+          <input type="email" id="email" name="email" required>
+          <input type="hidden" name="message" id="order_message">
+          <button type="submit" id="submitBtn" disabled>Submit</button>
+        </form>
       </div>
-    </div>`;
+    </div>
+  </div>`;
 
 let home_content = `
 <h1>Hoi :)</h1>
