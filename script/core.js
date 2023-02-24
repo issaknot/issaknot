@@ -138,6 +138,7 @@ function add_order_form_listeners(){
     modal.style.display = "block";
     let new_element = null;
     const container = document.querySelector(".current_selection")
+    container.innerHTML =""
     const form = document.querySelector(".selected_form")
     const color = document.querySelector(".selected_color")
     const scheme = document.querySelector(".selected_scheme")
@@ -376,16 +377,38 @@ let order_form_content = `
     <button id="openModalBtn">Submit</button>
     <div id="myModal" class="modal">
       <div class="modal-content">
-        <label>Your selection:</label>
-        <div class="current_selection">
+        
+        <div class="row">
+          <div class="col-25">
+            <label>Your selection:</label>
+          </div>
+          <div class="col-75">
+            <div class="current_selection"></div>
+          </div>
         </div>
         <form action="https://formspree.io/f/xayznkgq" method="POST" id="order_form">
-          <label for="comments">Comments:</label>
-          <textarea id="comments" type="text" name="comments"></textarea>
-          <label for="email">Your email (required):</label>
-          <input type="email" id="email" name="email" required>
-          <input type="hidden" name="message" id="order_message">
-          <button type="submit" id="submitBtn" disabled>Submit</button>
+          <div class="row">
+            <div class="col-25">
+              <label for="comments">Comments:</label>
+            </div>
+            <div class="col-75">
+              <textarea id="comments" type="text" name="comments"></textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-25">
+              <label for="email">Your email (required):</label>
+            </div>
+            <div class="col-75">
+              <input type="email" id="email" name="email" required>
+            </div>
+          </div>
+          <div class="row">
+            <input type="hidden" name="message" id="order_message">
+          </div>
+          <div class="row">
+            <button type="submit" id="submitBtn" disabled>Submit</button>
+          </div>
         </form>
       </div>
     </div>

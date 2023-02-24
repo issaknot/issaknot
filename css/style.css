@@ -190,111 +190,173 @@ figcaption {
 }
 
 .loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-nav-section-overlay);
-    transition: opacity 0.75s, visibility 0.75s;
-  }
-  
-  .loader::after {
-    content: "";
-    width: 75px;
-    height: 75px;
-    border: 15px solid var(--color-nav-section-hover);
-    border-top-color: var(--color-font-color);
-    border-radius: 50%;
-    animation: loading 0.75s ease infinite;
-  }
-  
-  @keyframes loading {
-    from {
-      transform: rotate(0turn);
-    }
-    to {
-      transform: rotate(1turn);
-    }
-  }
-
-  .img-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-  }
-  
-  .img-zoom {
-    max-width: 70%;
-    max-height: 70%;
-    align-self: center;
-  }
-  
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-  }
-  
-  .modal-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
-    align-items: left;
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 40%;
-    height: 40%;
-  }
-
-  .current_selection {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-  }
-
-.current_selection img {
-    height: 80px;
-    width: 80px;
-    margin: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-nav-section-overlay);
+  transition: opacity 0.75s, visibility 0.75s;
 }
   
-  .modal-content label{
-    font-size: 18px;
-  }
+.loader::after {
+  content: "";
+  width: 75px;
+  height: 75px;
+  border: 15px solid var(--color-nav-section-hover);
+  border-top-color: var(--color-font-color);
+  border-radius: 50%;
+  animation: loading 0.75s ease infinite;
+}
 
-  #comments {
-    height: 200px;
-    width: 100%;
-    margin-top: 15px;
-    margin-bottom: 15px;
+@keyframes loading {
+  from {
+    transform: rotate(0turn);
   }
-    
-  #email {
-    margin-top: 15px;
-    width: 100%;
+  to {
+    transform: rotate(1turn);
   }
+}
+
+.img-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.img-zoom {
+  max-width: 70%;
+  max-height: 70%;
+  align-self: center;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: left;
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 40%;
+  height: 40%;
+}
+
+.current_selection {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.current_selection img {
+  height: 80px;
+  width: 80px;
+  margin: 10px;
+}
+
+.modal-content label{
+  font-size: 18px;
+}
+
+#comments {
+  height: 200px;
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
   
-  #submitBtn {
-    display: block;
-    margin: 20px auto;
+#email {
+  margin-top: 15px;
+  width: 100%;
+}
+
+#submitBtn {
+  display: block;
+  margin: 20px auto;
+}
+
+/* Style inputs, select elements and textareas */
+input[type=text], select, textarea{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+/* Style the label to display next to the inputs */
+label {
+  padding: 12px 12px 12px 0;
+  display: inline-block;
+}
+
+/* Style the submit button */
+input[type=submit] {
+  background-color: #04AA6D;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  float: right;
+}
+
+/* Style the container */
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+/* Floating column for labels: 25% width */
+.col-25 {
+  float: left;
+  width: 25%;
+  margin-top: 6px;
+}
+
+/* Floating column for inputs: 75% width */
+.col-75 {
+  float: left;
+  width: 75%;
+  margin-top: 6px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .col-25, .col-75, input[type=submit] {
+    width: 100%;
+    margin-top: 0;
   }
-  
+}
