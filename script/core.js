@@ -119,13 +119,33 @@ let selectedColor = null;
 let selectedScheme = null;
 let selectedPersonalise = null;
 
-function selectImage(image, className, selectedImage) {
-  if (selectedImage != null) {
-    selectedImage.classList.remove(className);
-  }
-  selectedImage = image;
-  selectedImage.classList.add(className);
-  return selectedImage;
+function selectImage(image, className) {
+  if (image.classList.contains('available_colors_image')) {
+    if (selectedColor != null) {
+      selectedColor.classList.remove(className);
+    }
+    selectedColor = image;
+    selectedColor.classList.add(className);
+  } else if (image.classList.contains('available_forms_image')) {
+    if (selectedForm != null) {
+      selectedForm.classList.remove(className);
+    }
+    selectedForm = image;
+    selectedForm.classList.add(className);
+  } else if (image.classList.contains('available_schemes_image')) {
+    if (selectedScheme != null) {
+      selectedScheme.classList.remove(className);
+    }
+    selectedScheme = image;
+    selectedScheme.classList.add(className);
+  } else if (image.classList.contains('available_personalise_image')) {
+    if (selectedPersonalise != null) {
+      selectedPersonalise.classList.remove(className);
+    }
+    selectedPersonalise = image;
+    selectedPersonalise.classList.add(className);
+  } 
+
 }
 
 function add_order_form_listeners(){
